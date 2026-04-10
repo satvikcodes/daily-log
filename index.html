@@ -18,6 +18,7 @@ input,select,textarea{font-family:inherit;font-size:13px;background:var(--bg2);c
 textarea{height:56px;padding:8px 10px;resize:none;line-height:1.5}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(88,166,255,0.1)}
 input::placeholder,textarea::placeholder{color:var(--tx2)}
+input[readonly]{color:var(--tx1);cursor:default}
 .section{margin-bottom:1.5rem}
 .sec-head{display:flex;align-items:center;gap:10px;margin-bottom:.7rem}
 .sec-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -48,7 +49,10 @@ input::placeholder,textarea::placeholder{color:var(--tx2)}
 canvas{display:none}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.four{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
 select option{background:var(--bg2)}
+.sleep-auto{font-size:10px;color:var(--green);margin-top:3px;display:none}
+.hint{font-size:10px;color:var(--tx2);margin-top:3px}
 </style>
 
 <div class="root">
@@ -75,14 +79,38 @@ select option{background:var(--bg2)}
 
 <div class="section">
   <div class="sec-head"><div class="sec-dot" style="background:var(--purple)"></div><span class="sec-label">Anchors</span><div class="sec-line"></div></div>
-  <div class="three" style="margin-bottom:8px">
-    <div><label class="lbl">Wake up</label><input id="wake" type="time" value="07:00"/></div>
-    <div><label class="lbl">Sleep by</label><input id="sleepby" type="time" value="23:30"/></div>
-    <div><label class="lbl">Sleep hours</label><input id="sleeph" type="number" min="4" max="12" step="0.5" placeholder="7" oninput="liveSummary()"/></div>
+
+  <div class="four" style="margin-bottom:10px">
+    <div>
+      <label class="lbl">Wake up</label>
+      <input id="wake" type="time" value="07:00" oninput="calcSleep()"/>
+    </div>
+    <div>
+      <label class="lbl">Sleep by</label>
+      <input id="sleepby" type="time" value="23:30" oninput="calcSleep()"/>
+    </div>
+    <div>
+      <label class="lbl">Sleep hours</label>
+      <input id="sleeph" type="number" min="4" max="12" step="0.5" placeholder="auto" readonly oninput="liveSummary()"/>
+      <div class="sleep-auto" id="sleep-auto-hint">auto-calculated</div>
+    </div>
+    <div>
+      <label class="lbl">Commute (hrs)</label>
+      <input id="commuteh" type="number" min="0" max="4" step="0.5" placeholder="0.5" oninput="liveSummary()"/>
+    </div>
   </div>
+
   <div class="two">
-    <div><label class="lbl" id="main-lbl">College hours</label><input id="mainh" type="number" min="0" max="14" step="0.5" placeholder="6" oninput="liveSummary()"/></div>
-    <div><label class="lbl">Commute (hrs)</label><input id="commuteh" type="number" min="0" max="4" step="0.5" placeholder="0.5" oninput="liveSummary()"/></div>
+    <div>
+      <label class="lbl">College hours</label>
+      <input id="collegeh" type="number" min="0" max="14" step="0.5" placeholder="6" oninput="liveSummary()"/>
+      <div class="hint">Hours in college / attending classes</div>
+    </div>
+    <div id="work-hours-wrap" style="display:none">
+      <label class="lbl">Work hours</label>
+      <input id="workh" type="number" min="0" max="14" step="0.5" placeholder="0" oninput="liveSummary()"/>
+      <div class="hint">Additional work / internship hours</div>
+    </div>
   </div>
 </div>
 
@@ -113,11 +141,11 @@ select option{background:var(--bg2)}
 <div class="section">
   <div class="sec-head"><div class="sec-dot" style="background:var(--tx1)"></div><span class="sec-label">Energy level</span><div class="sec-line"></div></div>
   <div class="mood-row">
-    <button class="mood" data-m="1" onclick="setMood(1)" style="font-size:16px">😔</button>
-    <button class="mood" data-m="2" onclick="setMood(2)" style="font-size:16px">😐</button>
-    <button class="mood" data-m="3" onclick="setMood(3)" style="font-size:16px">🙂</button>
-    <button class="mood" data-m="4" onclick="setMood(4)" style="font-size:16px">😄</button>
-    <button class="mood" data-m="5" onclick="setMood(5)" style="font-size:16px">🔥</button>
+    <button class="mood" data-m="1" onclick="setMood(1)">😔</button>
+    <button class="mood" data-m="2" onclick="setMood(2)">😐</button>
+    <button class="mood" data-m="3" onclick="setMood(3)">🙂</button>
+    <button class="mood" data-m="4" onclick="setMood(4)">😄</button>
+    <button class="mood" data-m="5" onclick="setMood(5)">🔥</button>
   </div>
 </div>
 
@@ -135,13 +163,29 @@ select option{background:var(--bg2)}
 const QUOTES=["Discipline is choosing what you want most over what you want now.","Small steps every day compound into extraordinary results.","The secret of getting ahead is getting started.","Consistency beats intensity every single time.","Focus on process — outcomes follow.","Be so good they can't ignore you.","Every hour invested in yourself compounds over a lifetime.","Work hard in silence. Let results make the noise."];
 let dayType='college',mood=3,rc=0;
 
+function timeToMins(t){if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m;}
+
+function calcSleep(){
+  const wake=timeToMins(document.getElementById('wake').value);
+  const sleepby=timeToMins(document.getElementById('sleepby').value);
+  if(wake===null||sleepby===null)return;
+  let sleepMins=wake-sleepby;
+  if(sleepMins<0)sleepMins+=1440;
+  const sleepHrs=parseFloat((sleepMins/60).toFixed(1));
+  const inp=document.getElementById('sleeph');
+  inp.value=sleepHrs;
+  document.getElementById('sleep-auto-hint').style.display='block';
+  liveSummary();
+}
+
 function setDay(t){
   dayType=t;
   ['college','holiday','work'].forEach(x=>{
     const b=document.getElementById('dc-'+x);
     b.className='chip'+(x===t?' '+x:'');
   });
-  document.getElementById('main-lbl').textContent=t==='work'?'Work hours':'Active hours';
+  const workWrap=document.getElementById('work-hours-wrap');
+  workWrap.style.display=(t==='work')?'block':'none';
   liveSummary();
 }
 
@@ -186,17 +230,19 @@ function sumH(rows){return rows.reduce((a,r)=>a+r.h,0);}
 
 const LCATS=[
   {l:'Learning',c:'#3fb950'},{l:'Practice',c:'#bc8cff'},{l:'Personal',c:'#f778ba'},
-  {l:'College/Work',c:'#58a6ff'},{l:'Commute',c:'#8b949e'},{l:'Sleep',c:'#a78bfa'},{l:'Free',c:'#444c56'}
+  {l:'College',c:'#58a6ff'},{l:'Work',c:'#d29922'},{l:'Commute',c:'#8b949e'},
+  {l:'Sleep',c:'#a78bfa'},{l:'Free',c:'#444c56'}
 ];
 
 function liveSummary(){
   const lH=sumH(getRows('learn-list')),pH=sumH(getRows('prac-list')),peH=sumH(getRows('pers-list'));
-  const mH=parseFloat(document.getElementById('mainh').value)||0;
+  const collH=parseFloat(document.getElementById('collegeh').value)||0;
+  const workH=(dayType==='work')?(parseFloat(document.getElementById('workh').value)||0):0;
   const cH=parseFloat(document.getElementById('commuteh').value)||0;
   const sH=parseFloat(document.getElementById('sleeph').value)||0;
-  const total=lH+pH+peH+mH+cH+sH;
+  const total=lH+pH+peH+collH+workH+cH+sH;
   const freeH=Math.max(0,24-total);
-  const vals=[lH,pH,peH,mH,cH,sH,freeH];
+  const vals=[lH,pH,peH,collH,workH,cH,sH,freeH];
   const lb=document.getElementById('live-bars');lb.innerHTML='';
   LCATS.forEach((cat,i)=>{
     const h=parseFloat(vals[i].toFixed(1));if(!h)return;
@@ -210,7 +256,6 @@ function fmt12(t){if(!t)return'—';const[h,m]=t.split(':').map(Number);return`$
 function fmtDate(d){if(!d)return'';return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
 function fmtShort(d){if(!d)return'';return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
 function fmtDay(d){if(!d)return'';return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long'});}
-
 function hexAlpha(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;}
 
 function rr(ctx,x,y,w,h,r,fill,stroke,sw=1){
@@ -238,7 +283,8 @@ function exportPNG(){
   const wake=document.getElementById('wake').value;
   const sleepby=document.getElementById('sleepby').value;
   const sH=parseFloat(document.getElementById('sleeph').value)||0;
-  const mH=parseFloat(document.getElementById('mainh').value)||0;
+  const collH=parseFloat(document.getElementById('collegeh').value)||0;
+  const workH=(dayType==='work')?(parseFloat(document.getElementById('workh').value)||0):0;
   const cH=parseFloat(document.getElementById('commuteh').value)||0;
   const intention=document.getElementById('intention').value.trim();
   const learn=getRows('learn-list').filter(r=>r.name||r.h);
@@ -246,7 +292,7 @@ function exportPNG(){
   const pers=getRows('pers-list').filter(r=>r.name||r.h);
   const goals=getGoals();
   const lH=sumH(learn),pH=sumH(prac),peH=sumH(pers);
-  const total=lH+pH+peH+mH+cH+sH;
+  const total=lH+pH+peH+collH+workH+cH+sH;
   const freeH=parseFloat(Math.max(0,24-total).toFixed(1));
   const quote=QUOTES[Math.floor(Math.random()*QUOTES.length)];
   const moodEmojis=['','😔','😐','🙂','😄','🔥'];
@@ -266,6 +312,7 @@ function exportPNG(){
     purple:'#bc8cff',purpleBg:'#140d2e',purpleBorder:'#6e40c9',
     pink:'#f778ba',pinkBg:'#1a0a14',pinkBorder:'#9e3e6f',
     amber:'#d29922',amberBg:'#1a1000',amberBorder:'#735c0f',
+    blue:'#58a6ff',blueBg:'#0d2044',blueBorder:'#1f6feb',
   };
 
   const secDefs=[
@@ -290,9 +337,7 @@ function exportPNG(){
 
   c.fillStyle=C.bg0;c.fillRect(0,0,W,H);
   rr(c,0,0,W,H,0,C.bg0,null);
-
   rr(c,P-16,0,W-P*2+32,4,0,AC,null);
-
   rr(c,P-16,6,W-P*2+32,headerH-14,12,C.bg1,C.border,1);
 
   const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
@@ -331,24 +376,19 @@ function exportPNG(){
   if(secDefs.length>0){
     const cols=Math.min(secDefs.length,3);
     const cw=(IW-(cols-1)*16)/cols;
-
     secDefs.forEach((sec,ci)=>{
       const cx=P+ci*(cw+16);
       rr(c,cx,cy,cw,52+sec.items.length*ROW_H,10,C.bg2,sec.border,1);
       c.fillStyle=sec.color;c.fillRect(cx,cy,cw,3);
       rr(c,cx,cy,cw,3,3,sec.color,null);
-
       c.font='600 10px system-ui';c.fillStyle=sec.color;c.textAlign='left';
       c.fillText(sec.label.toUpperCase(),cx+14,cy+18);
-
       const subtotal=sumH(sec.items);
       c.font='500 11px system-ui';c.fillStyle=C.tx1;c.textAlign='right';
       c.fillText(subtotal.toFixed(1)+'h total',cx+cw-14,cy+18);
       c.textAlign='left';
-
       c.strokeStyle=sec.border;c.lineWidth=0.5;
       c.beginPath();c.moveTo(cx+14,cy+26);c.lineTo(cx+cw-14,cy+26);c.stroke();
-
       sec.items.forEach((row,ri)=>{
         const ry=cy+36+ri*ROW_H;
         if(ri>0){
@@ -356,7 +396,6 @@ function exportPNG(){
           c.beginPath();c.moveTo(cx+14,ry-2);c.lineTo(cx+cw-14,ry-2);c.stroke();
         }
         c.font='500 12px system-ui';c.fillStyle=C.tx0;
-        const maxNm=cw-28-(row.h?36:0);
         const nm=row.name||'—';
         c.fillText(nm.length>22?nm.slice(0,21)+'…':nm,cx+14,ry+13);
         if(row.slot){
@@ -397,7 +436,6 @@ function exportPNG(){
   c.strokeStyle=C.border;c.lineWidth=1;
   c.beginPath();c.moveTo(P,cy);c.lineTo(W-P,cy);c.stroke();
   cy+=16;
-
   c.font='600 10px system-ui';c.fillStyle=C.tx1;
   c.fillText('DAY SUMMARY',P,cy+12);
   cy+=24;
@@ -406,7 +444,7 @@ function exportPNG(){
     {label:'Learning',val:lH.toFixed(1)+'h',color:C.green,bg:C.greenBg},
     {label:'Practice',val:pH.toFixed(1)+'h',color:C.purple,bg:C.purpleBg},
     {label:'Personal',val:peH.toFixed(1)+'h',color:C.pink,bg:C.pinkBg},
-    {label:dayLabel,val:mH.toFixed(1)+'h',color:AC,bg:hexAlpha(AC,0.07)},
+    {label:'College',val:collH.toFixed(1)+'h',color:C.blue,bg:C.blueBg},
     {label:'Sleep',val:sH.toFixed(1)+'h',color:'#a78bfa',bg:'#140d2e'},
     {label:'Free',val:freeH.toFixed(1)+'h',color:C.tx1,bg:C.bg2},
   ];
@@ -423,7 +461,7 @@ function exportPNG(){
   cy+=72;
 
   const barData=[
-    {h:mH,c:AC},{h:lH,c:C.green},{h:pH,c:C.purple},
+    {h:collH,c:C.blue},{h:workH,c:C.amber},{h:lH,c:C.green},{h:pH,c:C.purple},
     {h:peH,c:C.pink},{h:cH,c:C.tx2},{h:sH,c:'#a78bfa'},{h:freeH,c:C.bg3}
   ].filter(x=>x.h>0);
   rr(c,P,cy,IW,12,6,C.bg2,null);
@@ -462,6 +500,7 @@ function exportPNG(){
 
 document.getElementById('dt').value=new Date().toISOString().split('T')[0];
 setDay('college');setMood(3);
+calcSleep();
 addRow('learn-list','Networks',2,'9–11 AM');
 addRow('learn-list','Algorithms',1.5,'11:30–1 PM');
 addRow('prac-list','DC circuits',1,'2–3 PM');
