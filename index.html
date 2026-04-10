@@ -1,0 +1,474 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#0d1117;--bg1:#161b22;--bg2:#1c2128;--bg3:#21262d;
+  --border:#30363d;--border2:#444c56;
+  --tx0:#e6edf3;--tx1:#8b949e;--tx2:#6e7681;
+  --blue:#58a6ff;--blueDim:#1f6feb;--blueBg:#0d2044;
+  --green:#3fb950;--greenDim:#196c2e;--greenBg:#0d2a0d;
+  --purple:#bc8cff;--purpleDim:#6e40c9;--purpleBg:#1a1040;
+  --pink:#f778ba;--pinkDim:#9e3e6f;--pinkBg:#2d1025;
+  --amber:#d29922;--amberDim:#735c0f;--amberBg:#2d1f00;
+  --red:#ff7b72;--redDim:#8e1519;--redBg:#2d0f0e;
+  --teal:#39d353;
+}
+.root{font-family:'Segoe UI',system-ui,sans-serif;padding:1.5rem 1rem 2.5rem;max-width:720px;background:var(--bg0);min-height:100vh;color:var(--tx0)}
+input,select,textarea{font-family:inherit;font-size:13px;background:var(--bg2);color:var(--tx0);border:1px solid var(--border);border-radius:6px;padding:0 10px;height:34px;width:100%}
+textarea{height:56px;padding:8px 10px;resize:none;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(88,166,255,0.1)}
+input::placeholder,textarea::placeholder{color:var(--tx2)}
+.section{margin-bottom:1.5rem}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:.7rem}
+.sec-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sec-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx1)}
+.sec-line{flex:1;height:1px;background:var(--border)}
+.chip-row{display:flex;gap:6px}
+.chip{height:28px;padding:0 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:transparent;color:var(--tx1);font-family:inherit;transition:all .15s}
+.chip:hover{border-color:var(--border2);color:var(--tx0)}
+.chip.college{color:var(--blue);background:var(--blueBg);border-color:var(--blueDim)}
+.chip.holiday{color:var(--green);background:var(--greenBg);border-color:var(--greenDim)}
+.chip.work{color:var(--amber);background:var(--amberBg);border-color:var(--amberDim)}
+.irow{display:grid;gap:8px;align-items:end;margin-bottom:8px}
+.irow-4{grid-template-columns:minmax(0,1.6fr) minmax(0,.8fr) minmax(0,1fr) 28px}
+.lbl{font-size:11px;color:var(--tx1);display:block;margin-bottom:4px}
+.rm{width:28px;height:34px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--tx2);font-size:16px;cursor:pointer;font-family:inherit;transition:all .15s}
+.rm:hover{color:var(--red);border-color:var(--redDim)}
+.add-btn{height:28px;padding:0 12px;border:1px dashed var(--border);border-radius:6px;background:transparent;font-size:12px;color:var(--tx2);cursor:pointer;font-family:inherit;margin-top:2px;transition:all .15s}
+.add-btn:hover{color:var(--tx0);border-style:solid;border-color:var(--border2)}
+.mood-row{display:flex;gap:6px}
+.mood{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;font-size:16px;cursor:pointer;transition:all .15s}
+.mood:hover{border-color:var(--border2);background:var(--bg3)}
+.live-bar-wrap{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-bottom:3px}
+.live-fill{height:100%;border-radius:3px;transition:width .3s}
+.live-lbl{font-size:11px;color:var(--tx1);display:flex;justify-content:space-between;margin-bottom:3px}
+.export-btn{width:100%;height:44px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);font-size:14px;font-weight:500;color:var(--tx0);cursor:pointer;font-family:inherit;margin-top:.25rem;transition:all .15s}
+.export-btn:hover{background:var(--bg3);border-color:var(--blue);color:var(--blue)}
+#out-img{max-width:100%;border-radius:10px;border:1px solid var(--border);margin-top:1rem;display:none;cursor:pointer}
+canvas{display:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+select option{background:var(--bg2)}
+</style>
+
+<div class="root">
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--blue)"></div><span class="sec-label">Identity</span><div class="sec-line"></div></div>
+  <div class="two" style="margin-bottom:8px">
+    <div><label class="lbl">Name</label><input id="nm" placeholder="Your name"/></div>
+    <div><label class="lbl">Date</label><input id="dt" type="date"/></div>
+  </div>
+  <div style="margin-bottom:10px">
+    <label class="lbl">Today's intention</label>
+    <textarea id="intention" placeholder="e.g. Stay locked in on networks, finish DC assignment."></textarea>
+  </div>
+  <div>
+    <label class="lbl">Day type</label>
+    <div class="chip-row">
+      <button class="chip college" id="dc-college" onclick="setDay('college')">College</button>
+      <button class="chip" id="dc-holiday" onclick="setDay('holiday')">Holiday</button>
+      <button class="chip" id="dc-work" onclick="setDay('work')">Work</button>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--purple)"></div><span class="sec-label">Anchors</span><div class="sec-line"></div></div>
+  <div class="three" style="margin-bottom:8px">
+    <div><label class="lbl">Wake up</label><input id="wake" type="time" value="07:00"/></div>
+    <div><label class="lbl">Sleep by</label><input id="sleepby" type="time" value="23:30"/></div>
+    <div><label class="lbl">Sleep hours</label><input id="sleeph" type="number" min="4" max="12" step="0.5" placeholder="7" oninput="liveSummary()"/></div>
+  </div>
+  <div class="two">
+    <div><label class="lbl" id="main-lbl">College hours</label><input id="mainh" type="number" min="0" max="14" step="0.5" placeholder="6" oninput="liveSummary()"/></div>
+    <div><label class="lbl">Commute (hrs)</label><input id="commuteh" type="number" min="0" max="4" step="0.5" placeholder="0.5" oninput="liveSummary()"/></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--green)"></div><span class="sec-label">Learning</span><div class="sec-line"></div></div>
+  <div id="learn-list"></div>
+  <button class="add-btn" onclick="addRow('learn-list')">+ subject / skill</button>
+</div>
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--purple)"></div><span class="sec-label">Practice &amp; revision</span><div class="sec-line"></div></div>
+  <div id="prac-list"></div>
+  <button class="add-btn" onclick="addRow('prac-list')">+ subject</button>
+</div>
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--pink)"></div><span class="sec-label">Personal space</span><div class="sec-line"></div></div>
+  <div id="pers-list"></div>
+  <button class="add-btn" onclick="addRow('pers-list')">+ activity</button>
+</div>
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--amber)"></div><span class="sec-label">Goals for today</span><div class="sec-line"></div></div>
+  <div id="goal-list"></div>
+  <button class="add-btn" onclick="addGoal()">+ add goal</button>
+</div>
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--tx1)"></div><span class="sec-label">Energy level</span><div class="sec-line"></div></div>
+  <div class="mood-row">
+    <button class="mood" data-m="1" onclick="setMood(1)" style="font-size:16px">😔</button>
+    <button class="mood" data-m="2" onclick="setMood(2)" style="font-size:16px">😐</button>
+    <button class="mood" data-m="3" onclick="setMood(3)" style="font-size:16px">🙂</button>
+    <button class="mood" data-m="4" onclick="setMood(4)" style="font-size:16px">😄</button>
+    <button class="mood" data-m="5" onclick="setMood(5)" style="font-size:16px">🔥</button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-head"><div class="sec-dot" style="background:var(--teal)"></div><span class="sec-label">Live 24h</span><div class="sec-line"></div></div>
+  <div id="live-bars"></div>
+</div>
+
+<button class="export-btn" onclick="exportPNG()">Export PNG</button>
+<img id="out-img" title="Click to download"/>
+<canvas id="cv"></canvas>
+</div>
+
+<script>
+const QUOTES=["Discipline is choosing what you want most over what you want now.","Small steps every day compound into extraordinary results.","The secret of getting ahead is getting started.","Consistency beats intensity every single time.","Focus on process — outcomes follow.","Be so good they can't ignore you.","Every hour invested in yourself compounds over a lifetime.","Work hard in silence. Let results make the noise."];
+let dayType='college',mood=3,rc=0;
+
+function setDay(t){
+  dayType=t;
+  ['college','holiday','work'].forEach(x=>{
+    const b=document.getElementById('dc-'+x);
+    b.className='chip'+(x===t?' '+x:'');
+  });
+  document.getElementById('main-lbl').textContent=t==='work'?'Work hours':'Active hours';
+  liveSummary();
+}
+
+function setMood(m){
+  mood=m;
+  document.querySelectorAll('.mood').forEach(b=>{
+    const bm=+b.dataset.m;
+    b.style.borderColor=bm===m?'#d29922':'';
+    b.style.background=bm===m?'#2d1f00':'transparent';
+  });
+}
+
+function addRow(listId,name='',h='',slot=''){
+  rc++;const id='r'+rc;
+  const div=document.createElement('div');
+  div.id=id;div.className='irow irow-4';
+  div.innerHTML=`<div><label class="lbl">Name</label><input placeholder="e.g. Networks" value="${name}" oninput="liveSummary()"/></div>`+
+    `<div><label class="lbl">Hours</label><input type="number" min="0" max="12" step="0.5" placeholder="1.5" value="${h}" oninput="liveSummary()"/></div>`+
+    `<div><label class="lbl">Time slot</label><input placeholder="9–11 AM" value="${slot}"/></div>`+
+    `<button class="rm" onclick="document.getElementById('${id}').remove();liveSummary()">×</button>`;
+  document.getElementById(listId).appendChild(div);
+  liveSummary();
+}
+
+let gc=0;
+function addGoal(text=''){
+  gc++;const id='g'+gc;
+  const div=document.createElement('div');
+  div.id=id;div.style.cssText='display:flex;gap:8px;margin-bottom:8px;align-items:center';
+  div.innerHTML=`<input placeholder="e.g. Finish DC assignment" value="${text}" style="flex:1"/><button class="rm" onclick="document.getElementById('${id}').remove()">×</button>`;
+  document.getElementById('goal-list').appendChild(div);
+}
+
+function getRows(lid){
+  return Array.from(document.getElementById(lid).querySelectorAll('.irow')).map(r=>{
+    const ins=r.querySelectorAll('input');
+    return{name:ins[0].value.trim(),h:parseFloat(ins[1].value)||0,slot:ins[2].value.trim()};
+  });
+}
+function getGoals(){return Array.from(document.getElementById('goal-list').querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);}
+function sumH(rows){return rows.reduce((a,r)=>a+r.h,0);}
+
+const LCATS=[
+  {l:'Learning',c:'#3fb950'},{l:'Practice',c:'#bc8cff'},{l:'Personal',c:'#f778ba'},
+  {l:'College/Work',c:'#58a6ff'},{l:'Commute',c:'#8b949e'},{l:'Sleep',c:'#a78bfa'},{l:'Free',c:'#444c56'}
+];
+
+function liveSummary(){
+  const lH=sumH(getRows('learn-list')),pH=sumH(getRows('prac-list')),peH=sumH(getRows('pers-list'));
+  const mH=parseFloat(document.getElementById('mainh').value)||0;
+  const cH=parseFloat(document.getElementById('commuteh').value)||0;
+  const sH=parseFloat(document.getElementById('sleeph').value)||0;
+  const total=lH+pH+peH+mH+cH+sH;
+  const freeH=Math.max(0,24-total);
+  const vals=[lH,pH,peH,mH,cH,sH,freeH];
+  const lb=document.getElementById('live-bars');lb.innerHTML='';
+  LCATS.forEach((cat,i)=>{
+    const h=parseFloat(vals[i].toFixed(1));if(!h)return;
+    const pct=Math.round(h/24*100);
+    lb.innerHTML+=`<div style="margin-bottom:8px"><div class="live-lbl"><span style="color:${cat.c}">${cat.l}</span><span>${h}h &nbsp;${pct}%</span></div><div class="live-bar-wrap"><div class="live-fill" style="width:${pct}%;background:${cat.c}"></div></div></div>`;
+  });
+  if(total>0) lb.innerHTML+=`<div style="font-size:11px;color:#6e7681;margin-top:2px">Scheduled ${parseFloat(total.toFixed(1))}h of 24h — ${freeH.toFixed(1)}h unscheduled</div>`;
+}
+
+function fmt12(t){if(!t)return'—';const[h,m]=t.split(':').map(Number);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
+function fmtDate(d){if(!d)return'';return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function fmtShort(d){if(!d)return'';return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDay(d){if(!d)return'';return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long'});}
+
+function hexAlpha(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;}
+
+function rr(ctx,x,y,w,h,r,fill,stroke,sw=1){
+  if(w<=0||h<=0)return;
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw;ctx.stroke();}
+}
+
+function wrapText(ctx,text,x,y,maxW,lh){
+  const words=text.split(' ');let line='';const lines=[];
+  for(const w of words){const t=line+w+' ';if(ctx.measureText(t).width>maxW&&line){lines.push(line.trim());line=w+' ';}else line=t;}
+  if(line.trim())lines.push(line.trim());
+  lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lh));
+  return lines.length;
+}
+
+function exportPNG(){
+  const name=document.getElementById('nm').value.trim()||'Friend';
+  const dateVal=document.getElementById('dt').value;
+  const wake=document.getElementById('wake').value;
+  const sleepby=document.getElementById('sleepby').value;
+  const sH=parseFloat(document.getElementById('sleeph').value)||0;
+  const mH=parseFloat(document.getElementById('mainh').value)||0;
+  const cH=parseFloat(document.getElementById('commuteh').value)||0;
+  const intention=document.getElementById('intention').value.trim();
+  const learn=getRows('learn-list').filter(r=>r.name||r.h);
+  const prac=getRows('prac-list').filter(r=>r.name||r.h);
+  const pers=getRows('pers-list').filter(r=>r.name||r.h);
+  const goals=getGoals();
+  const lH=sumH(learn),pH=sumH(prac),peH=sumH(pers);
+  const total=lH+pH+peH+mH+cH+sH;
+  const freeH=parseFloat(Math.max(0,24-total).toFixed(1));
+  const quote=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  const moodEmojis=['','😔','😐','🙂','😄','🔥'];
+  const moodLabels=['','Low','Okay','Good','Great','On fire'];
+
+  const accentC={college:'#58a6ff',holiday:'#3fb950',work:'#d29922'};
+  const AC=accentC[dayType];
+  const dayLabel={college:'College day',holiday:'Holiday',work:'Work day'}[dayType];
+
+  const W=800,P=40,IW=W-P*2;
+
+  const C={
+    bg0:'#0d1117',bg1:'#161b22',bg2:'#1c2128',bg3:'#21262d',
+    border:'#30363d',border2:'#444c56',
+    tx0:'#e6edf3',tx1:'#8b949e',tx2:'#6e7681',
+    green:'#3fb950',greenBg:'#0a1f0a',greenBorder:'#196c2e',
+    purple:'#bc8cff',purpleBg:'#140d2e',purpleBorder:'#6e40c9',
+    pink:'#f778ba',pinkBg:'#1a0a14',pinkBorder:'#9e3e6f',
+    amber:'#d29922',amberBg:'#1a1000',amberBorder:'#735c0f',
+  };
+
+  const secDefs=[
+    {key:'learn',label:'Learning',color:C.green,bg:C.greenBg,border:C.greenBorder,items:learn},
+    {key:'prac',label:'Practice & revision',color:C.purple,bg:C.purpleBg,border:C.purpleBorder,items:prac},
+    {key:'pers',label:'Personal space',color:C.pink,bg:C.pinkBg,border:C.pinkBorder,items:pers},
+  ].filter(s=>s.items.length>0);
+
+  const COLW=(IW-24)/3;
+  const maxRows=Math.max(...secDefs.map(s=>s.items.length),1);
+  const ROW_H=44;
+  const colsH=secDefs.length>0?52+maxRows*ROW_H+20:0;
+  const goalH=goals.length>0?goals.length*28+52:0;
+  const summaryH=170;
+  const headerH=intention?178:148;
+  const H=headerH+colsH+goalH+summaryH+P;
+
+  const cv=document.getElementById('cv');
+  cv.width=W*2;cv.height=H*2;
+  const c=cv.getContext('2d');
+  c.scale(2,2);
+
+  c.fillStyle=C.bg0;c.fillRect(0,0,W,H);
+  rr(c,0,0,W,H,0,C.bg0,null);
+
+  rr(c,P-16,0,W-P*2+32,4,0,AC,null);
+
+  rr(c,P-16,6,W-P*2+32,headerH-14,12,C.bg1,C.border,1);
+
+  const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  rr(c,P,18,48,48,24,hexAlpha(AC,0.15),AC,1);
+  c.font='600 16px system-ui';c.fillStyle=AC;c.textAlign='center';
+  c.fillText(initials,P+24,48);c.textAlign='left';
+
+  c.font='600 22px system-ui';c.fillStyle=C.tx0;
+  c.fillText(name,P+60,36);
+  c.font='400 12px system-ui';c.fillStyle=C.tx1;
+  c.fillText(dayLabel,P+60,54);
+
+  c.font='500 14px system-ui';c.fillStyle=AC;c.textAlign='right';
+  c.fillText(fmtShort(dateVal),W-P,30);
+  c.font='400 12px system-ui';c.fillStyle=C.tx1;
+  c.fillText(fmtDay(dateVal),W-P,48);
+  c.font='400 11px system-ui';c.fillStyle=C.tx2;
+  c.fillText(`${moodEmojis[mood]} ${moodLabels[mood]}  ·  Wake ${fmt12(wake)}  ·  Sleep ${fmt12(sleepby)}`,W-P,64);
+  c.textAlign='left';
+
+  let cy=76;
+  c.strokeStyle=C.border;c.lineWidth=1;
+  c.beginPath();c.moveTo(P,cy);c.lineTo(W-P,cy);c.stroke();
+  cy+=12;
+
+  if(intention){
+    c.font='italic 12px system-ui';c.fillStyle=hexAlpha(AC,0.9);
+    const n=wrapText(c,'"'+intention+'"',P,cy+14,IW,17);
+    cy+=n*17+18;
+  }
+
+  c.strokeStyle=C.border;c.lineWidth=1;
+  c.beginPath();c.moveTo(P,cy);c.lineTo(W-P,cy);c.stroke();
+  cy+=14;
+
+  if(secDefs.length>0){
+    const cols=Math.min(secDefs.length,3);
+    const cw=(IW-(cols-1)*16)/cols;
+
+    secDefs.forEach((sec,ci)=>{
+      const cx=P+ci*(cw+16);
+      rr(c,cx,cy,cw,52+sec.items.length*ROW_H,10,C.bg2,sec.border,1);
+      c.fillStyle=sec.color;c.fillRect(cx,cy,cw,3);
+      rr(c,cx,cy,cw,3,3,sec.color,null);
+
+      c.font='600 10px system-ui';c.fillStyle=sec.color;c.textAlign='left';
+      c.fillText(sec.label.toUpperCase(),cx+14,cy+18);
+
+      const subtotal=sumH(sec.items);
+      c.font='500 11px system-ui';c.fillStyle=C.tx1;c.textAlign='right';
+      c.fillText(subtotal.toFixed(1)+'h total',cx+cw-14,cy+18);
+      c.textAlign='left';
+
+      c.strokeStyle=sec.border;c.lineWidth=0.5;
+      c.beginPath();c.moveTo(cx+14,cy+26);c.lineTo(cx+cw-14,cy+26);c.stroke();
+
+      sec.items.forEach((row,ri)=>{
+        const ry=cy+36+ri*ROW_H;
+        if(ri>0){
+          c.strokeStyle=hexAlpha(sec.border,0.4);c.lineWidth=0.5;
+          c.beginPath();c.moveTo(cx+14,ry-2);c.lineTo(cx+cw-14,ry-2);c.stroke();
+        }
+        c.font='500 12px system-ui';c.fillStyle=C.tx0;
+        const maxNm=cw-28-(row.h?36:0);
+        const nm=row.name||'—';
+        c.fillText(nm.length>22?nm.slice(0,21)+'…':nm,cx+14,ry+13);
+        if(row.slot){
+          c.font='400 10px system-ui';c.fillStyle=C.tx2;
+          c.fillText(row.slot,cx+14,ry+28);
+        }
+        if(row.h){
+          rr(c,cx+cw-46,ry+4,36,22,11,hexAlpha(sec.color,0.15),null);
+          c.font='600 10px system-ui';c.fillStyle=sec.color;c.textAlign='center';
+          c.fillText(row.h.toFixed(1)+'h',cx+cw-28,ry+18);c.textAlign='left';
+        }
+      });
+    });
+    cy+=52+Math.max(...secDefs.map(s=>s.items.length))*ROW_H+20;
+  }
+
+  if(goals.length>0){
+    c.strokeStyle=C.border;c.lineWidth=1;
+    c.beginPath();c.moveTo(P,cy);c.lineTo(W-P,cy);c.stroke();
+    cy+=14;
+    c.font='600 10px system-ui';c.fillStyle=C.amber;
+    c.fillText('GOALS FOR TODAY',P,cy+12);
+    cy+=24;
+    const gcols=Math.min(goals.length,2);
+    const gw=(IW-(gcols-1)*12)/gcols;
+    goals.forEach((g,i)=>{
+      const gcx=P+(i%gcols)*(gw+12);
+      const gcy=cy+Math.floor(i/gcols)*34;
+      rr(c,gcx,gcy,gw,26,6,C.amberBg,C.amberBorder,0.5);
+      c.fillStyle=C.amber;c.fillRect(gcx,gcy,3,26);
+      rr(c,gcx,gcy,3,26,0,C.amber,null);
+      c.font='400 12px system-ui';c.fillStyle=C.tx0;
+      c.fillText(g.length>45?g.slice(0,44)+'…':g,gcx+14,gcy+17);
+    });
+    cy+=Math.ceil(goals.length/2)*34+16;
+  }
+
+  c.strokeStyle=C.border;c.lineWidth=1;
+  c.beginPath();c.moveTo(P,cy);c.lineTo(W-P,cy);c.stroke();
+  cy+=16;
+
+  c.font='600 10px system-ui';c.fillStyle=C.tx1;
+  c.fillText('DAY SUMMARY',P,cy+12);
+  cy+=24;
+
+  const stats=[
+    {label:'Learning',val:lH.toFixed(1)+'h',color:C.green,bg:C.greenBg},
+    {label:'Practice',val:pH.toFixed(1)+'h',color:C.purple,bg:C.purpleBg},
+    {label:'Personal',val:peH.toFixed(1)+'h',color:C.pink,bg:C.pinkBg},
+    {label:dayLabel,val:mH.toFixed(1)+'h',color:AC,bg:hexAlpha(AC,0.07)},
+    {label:'Sleep',val:sH.toFixed(1)+'h',color:'#a78bfa',bg:'#140d2e'},
+    {label:'Free',val:freeH.toFixed(1)+'h',color:C.tx1,bg:C.bg2},
+  ];
+  const SW=(IW-40)/6;
+  stats.forEach((s,i)=>{
+    const sx=P+i*(SW+8);
+    rr(c,sx,cy,SW,56,8,s.bg,s.color+'44',0.5);
+    c.font='400 10px system-ui';c.fillStyle=s.color;c.textAlign='center';
+    c.fillText(s.label,sx+SW/2,cy+18);
+    c.font='600 18px system-ui';c.fillStyle=C.tx0;
+    c.fillText(s.val,sx+SW/2,cy+40);
+    c.textAlign='left';
+  });
+  cy+=72;
+
+  const barData=[
+    {h:mH,c:AC},{h:lH,c:C.green},{h:pH,c:C.purple},
+    {h:peH,c:C.pink},{h:cH,c:C.tx2},{h:sH,c:'#a78bfa'},{h:freeH,c:C.bg3}
+  ].filter(x=>x.h>0);
+  rr(c,P,cy,IW,12,6,C.bg2,null);
+  let bx=P;
+  barData.forEach((seg,i)=>{
+    const sw=Math.max(0,seg.h/24*IW);
+    const rl=i===0?6:0,rr2=i===barData.length-1?6:0;
+    c.fillStyle=seg.c;c.beginPath();
+    c.moveTo(bx+rl,cy);c.lineTo(bx+sw-rr2,cy);
+    c.arcTo(bx+sw,cy,bx+sw,cy+rr2,rr2);c.lineTo(bx+sw,cy+12-rr2);
+    c.arcTo(bx+sw,cy+12,bx+sw-rr2,cy+12,rr2);c.lineTo(bx+rl,cy+12);
+    c.arcTo(bx,cy+12,bx,cy+12-rl,rl);c.lineTo(bx,cy+rl);
+    c.arcTo(bx,cy,bx+rl,cy,rl);c.closePath();c.fill();
+    bx+=sw;
+  });
+  cy+=22;
+
+  c.font='400 10px system-ui';c.fillStyle=C.tx2;c.textAlign='center';
+  c.fillText(quote,W/2,cy+12);
+  cy+=28;
+  c.font='400 10px system-ui';c.fillStyle=C.border2;c.textAlign='center';
+  c.fillText('Daily Work Log  ·  '+fmtDate(dateVal),W/2,cy);
+  c.textAlign='left';
+
+  const img=document.getElementById('out-img');
+  img.src=cv.toDataURL('image/png');
+  img.style.display='block';
+  img.scrollIntoView({behavior:'smooth'});
+  img.onclick=()=>{
+    const a=document.createElement('a');
+    a.href=img.src;
+    a.download=`${name.replace(/\s+/g,'_')}_${dateVal||'log'}.png`;
+    a.click();
+  };
+}
+
+document.getElementById('dt').value=new Date().toISOString().split('T')[0];
+setDay('college');setMood(3);
+addRow('learn-list','Networks',2,'9–11 AM');
+addRow('learn-list','Algorithms',1.5,'11:30–1 PM');
+addRow('prac-list','DC circuits',1,'2–3 PM');
+addRow('prac-list','VLSI problems',1,'3–4 PM');
+addRow('pers-list','Workout',1,'6–7 AM');
+addRow('pers-list','Social',0.5,'Evening');
+addGoal('Finish DC assignment');
+addGoal('Complete 2 Networks lectures');
+liveSummary();
+</script>
